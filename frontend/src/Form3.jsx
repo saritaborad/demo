@@ -1,147 +1,125 @@
-// ... (previous frontend code)
-
-import { useEffect, useState } from "react";
+// components/Form.js
+import React, { useState } from "react";
+import axios from "axios";
 
 const Form = () => {
- // ... (previous code)
+  const [formFields, setFormFields] = useState([]);
+  const [currentFieldType, setCurrentFieldType] = useState("text");
 
- const [forms, setForms] = useState([]);
- const [selectedForm, setSelectedForm] = useState(null);
- const [userAnswers, setUserAnswers] = useState([]);
-
- // Fetch forms from the server
- useEffect(() => {
-   const fetchForms = async () => {
-     try {
-       const response = await fetch('http://localhost:5000/api/forms');
-       const formsData = await response.json();
-       setForms(formsData);
-     } catch (error) {
-       console.error('Error fetching forms:', error);
-     }
-   };
-
-   fetchForms();
- }, []);
-
-  const handleAnswerChange =()=>{}
- // Select a form to answer
- const handleFormSelect = (formId) => {
-   const selected = forms.find((form) => form._id === formId);
-   setSelectedForm(selected);
-   setUserAnswers([]);
- };
-
- // Submit answers
- const handleSubmit = async () => {
-   try {
-     const response = await fetch('http://localhost:5000/api/submit', {
-       method: 'POST',
-       headers: {
-         'Content-Type': 'application/json',
-       },
-       body: JSON.stringify({ formId: selectedForm._id, answers: userAnswers }),
-     });
-     const result = await response.json();
-     if (result.success) {
-       alert('Answers submitted successfully!');
-     } else {
-       alert('Failed to submit answers.');
-     }
-   } catch (error) {
-     console.error('Error submitting answers:', error);
-   }
+  const handleAddField = () => {
+    setFormFields([...formFields, { label: "", type: currentFieldType, required: false }]);
   };
-  const handleCheckboxChange = ()=>{}
 
- // ... (previous code)
+  const handleInputChange = (index, key, value) => {
+    const updatedFields = [...formFields];
+    updatedFields[index][key] = value;
+    setFormFields(updatedFields);
+  };
 
- return (
-   <div>
-     {/* ... (previous code) */}
+  const handleFieldTypeChange = (e) => {
+    setCurrentFieldType(e.target.value);
+  };
 
-     <h2>Available Forms</h2>
-     <ul>
-       {forms.map((form) => (
-         <li key={form._id} onClick={() => handleFormSelect(form._id)}>
-           {form.fields.map((field, index) => (
-             <div key={index}>
-               {field.label} - {field.type}
-             </div>
-           ))}
-         </li>
-       ))}
-     </ul>
+  const handleCreateForm = async () => {
+    try {
+      const response = await axios.post("http://localhost:5001/createForm", { fields: formFields });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-     {selectedForm && (
-       <div>
-         <h2>Submit Answers for {selectedForm._id}</h2>
-         {selectedForm.fields.map((field, index) => (
-           <div key={index}>
-             <label>
-               {field.label} 
-               {field.required && ' (*)'}
-             </label>
-             {/* Add appropriate input components based on field.type */}
-             {field.type === 'text' && (
-               <input
-                 type="text"
-                 value={userAnswers[index] || ''}
-                 onChange={(e) => handleAnswerChange(index, e.target.value)}
-               />
-             )}
-             {field.type === 'radio' && (
-               <div>
-                 {field.options.map((option, optionIndex) => (
-                   <label key={optionIndex}>
-                     <input
-                       type="radio"
-                       value={option}
-                       checked={userAnswers[index] === option}
-                       onChange={() => handleAnswerChange(index, option)}
-                     />
-                     {option}
-                   </label>
-                 ))}
-               </div>
-             )}
-             {field.type === 'checkbox' && (
-               <div>
-                 {field.options.map((option, optionIndex) => (
-                   <label key={optionIndex}>
-                     <input
-                       type="checkbox"
-                       value={option}
-                       checked={userAnswers[index]?.includes(option) || false}
-                       onChange={() => handleCheckboxChange(index, option)}
-                     />
-                     {option}
-                   </label>
-                 ))}
-               </div>
-             )}
-             {field.type === 'dropdown' && (
-               <select
-                 value={userAnswers[index] || ''}
-                 onChange={(e) => handleAnswerChange(index, e.target.value)}
-               >
-                 <option value="">Select an option</option>
-                 {field.options.map((option, optionIndex) => (
-                   <option key={optionIndex} value={option}>
-                     {option}
-                   </option>
-                 ))}
-               </select>
-             )}
-           </div>
-         ))}
-         <button type="button" onClick={handleSubmit}>
-           Submit Answers
-         </button>
-       </div>
-     )}
-   </div>
- );
+  const handleSubmission = async () => {
+    try {
+      // For simplicity, use the first form in the state.
+      const formId = "replace-with-form-id";
+      const answers = formFields.reduce(
+        (acc, field) => ({ ...acc, [field.label]: "" }), // Initialize answers with empty strings
+        {}
+      );
+
+      const response = await axios.post("http://localhost:5001/submitForm", { formId, answers });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div>
+      <div>
+        <label>
+          Question:
+          <input type="text" onChange={(e) => handleInputChange(0, "label", e.target.value)} />
+        </label>
+        <label>
+          Answer Type:
+          <select value={currentFieldType} onChange={handleFieldTypeChange}>
+            <option value="text">Text</option>
+            <option value="radio">Radio</option>
+            <option value="checkbox">Checkbox</option>
+            <option value="dropdown">Dropdown</option>
+          </select>
+        </label>
+      </div>
+      <div>
+        {formFields.map((field, index) => (
+          <div key={index}>
+            <label>
+              Label:
+              <input
+                type="text"
+                value={field.label}
+                onChange={(e) => handleInputChange(index, "label", e.target.value)}
+              />
+            </label>
+            {/* Render input dynamically based on the selected answer type */}
+            {currentFieldType === "text" && (
+              <input
+                type="text"
+                value={field.label}
+                onChange={(e) => handleInputChange(index, "label", e.target.value)}
+              />
+            )}
+            {currentFieldType === "radio" && (
+              <input
+                type="radio"
+                value={field.label}
+                onChange={(e) => handleInputChange(index, "label", e.target.value)}
+              />
+            )}
+            {currentFieldType === "checkbox" && (
+              <input
+                type="checkbox"
+                value={field.label}
+                onChange={(e) => handleInputChange(index, "label", e.target.value)}
+              />
+            )}
+            {currentFieldType === "dropdown" && (
+              <select
+                value={field.label}
+                onChange={(e) => handleInputChange(index, "label", e.target.value)}
+              >
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+              </select>
+            )}
+            <label>
+              Required:
+              <input
+                type="checkbox"
+                checked={field.required}
+                onChange={(e) => handleInputChange(index, "required", e.target.checked)}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+      <button onClick={handleAddField}>Add Field</button>
+      <button onClick={handleCreateForm}>Create Form</button>
+      <button onClick={handleSubmission}>Submit</button>
+    </div>
+  );
 };
 
 export default Form;

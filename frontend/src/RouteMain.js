@@ -5,7 +5,7 @@ import Register from "./Register";
 import PostList from "./PostList";
 import AddPost from "./AddPost";
 import PostDetail from "./PostDetail";
-import Form3 from "./Form2";
+import Form from "./Form3";
 
 function RequireAuth() {
  let isAuthenticated = localStorage.getItem("admin_token");
@@ -22,7 +22,7 @@ const RouteMain = () => {
   <>
    <BrowserRouter>
     <Routes>
-     <Route path="/" element={<Form3 />} />
+     <Route path="/" element={<Form />} />
      <Route path="/login" element={<Login />} />
      <Route path="/register" element={<Register />} />
      <Route element={<RequireAuth />}>
