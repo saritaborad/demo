@@ -1,0 +1,29 @@
+Here is your practical task, please check and let me know if you have any questions
+Create a custom form application like Google form we can make it custom.
+
+Create a form with a textbox, radio button, checkbox, and dropdown, and is required for everyone.
+
+If the field is required then the user must have to fill it in and show the (*) sign above the field.
+
+Admin can create a form and the user can submit the form with an answer.
+
+Use migration and seeder for schema and dummy data
+
+Please use validation if required
+
+please check the attachment and follow the same
+
+Please follow the code standard
+
+Stack:- React, Redux, MongoDB, Node, and Typescript
+
+----------------------------------------------
+npm init -y
+npm install express mongoose body-parser cors dotenv @types/node @types/express @types/mongoose @types/body-parser @types/cors ts-node typescript
+
+
+npx create-react-app frontend --template typescript
+cd frontend
+npm install redux react-redux @types/react-redux redux-thunk @types/redux-thunk
+
+https://codesandbox.io/p/sandbox/google-forms-clone-q6yh62?file=%2Fsrc%2Fcomponents%2FdynamicForms.js%3A72%2C26
